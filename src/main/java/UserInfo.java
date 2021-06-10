@@ -31,13 +31,13 @@ public class UserInfo {
         return database;
     }
 
-    public String askFirstColumnName() {
+    public static String askFirstColumnName() {
         Scanner sc = new Scanner(System.in);
         System.out.print("First column title(front of the card):");
         return sc.nextLine();
     }
 
-    public String askSecondColumnName() {
+    public static String askSecondColumnName() {
         Scanner sc = new Scanner(System.in);
         System.out.print("Second column title(back of the card):");
         return sc.nextLine();
