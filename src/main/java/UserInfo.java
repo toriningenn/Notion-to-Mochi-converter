@@ -42,4 +42,21 @@ public class UserInfo {
         System.out.print("Second column title(back of the card):");
         return sc.nextLine();
     }
+
+    public static String askIfCreateDeck() {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Create a new deck?");
+        return sc.nextLine();
+    }
+
+    public static String askForMochiEmail() {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Mochi account email:");
+        return sc.nextLine();
+    }
+    public static String askForMochiPassword() {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Mochi account password:");
+        return sc.nextLine();
+    }
 }

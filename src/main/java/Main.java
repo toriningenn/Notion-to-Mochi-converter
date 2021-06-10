@@ -16,11 +16,12 @@ public class Main {
     public static void main(String[] args) throws IOException {
         ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
 
-        NotionClient notionClient = new NotionClient(UserInfo.askToken(),
-                new OkHttp4Client(),
-                new Slf4jLogger());
+       // NotionClient notionClient = new NotionClient(UserInfo.askToken(),
+        //        new OkHttp4Client(),
+         //       new Slf4jLogger());
 
-       Dictionary dictionary = new Dictionary(notionClient);
-        System.out.println(ow.writeValueAsString(dictionary.createDictionary()));
+        //    Dictionary dictionary = new Dictionary(notionClient);
+        //     System.out.println(ow.writeValueAsString(dictionary.createDictionary()));
+        System.out.println(ow.writeValueAsString(MochiRequests.login()));
     }
 }
