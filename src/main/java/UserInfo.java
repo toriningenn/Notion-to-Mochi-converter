@@ -49,6 +49,17 @@ public class UserInfo {
         return sc.nextLine();
     }
 
+    public static String askForDeckID() {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("To get the deck-id of the deck you want to add the card to, right click on the deck in " +
+                "the sidebar in the app and choose \"Copy ID\". " +
+                "\nThat will copy some markdown to your clipboard that will include the UUID for that deck. \n" +
+                "It will look something like this: 17d379f1-650f-45d3-bac1-591a1e302786.\n" +
+                "Note that the @deck/ is not part of the ID." +
+                "Insert deck ID:");
+        return sc.nextLine();
+    }
+
     public static String askForMochiEmail() {
         Scanner sc = new Scanner(System.in);
         System.out.print("Mochi account email:");
