@@ -13,9 +13,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class MochiService {
     private final static OkHttpClient defaultClient = new OkHttpClient.Builder().build();
     private final static OkHttpClient client = defaultClient.newBuilder()
-            .readTimeout(15, TimeUnit.DAYS)
-            .connectTimeout(15, TimeUnit.DAYS)
-            .readTimeout(15,TimeUnit.DAYS)
+            .readTimeout(30, TimeUnit.SECONDS)
+            .connectTimeout(30, TimeUnit.SECONDS)
+            .readTimeout(30,TimeUnit.SECONDS)
             .connectionPool(new ConnectionPool(0, 1, TimeUnit.SECONDS))
             .build();
 //.protocols(List.of(Protocol.HTTP_1_1))
@@ -33,7 +33,6 @@ public class MochiService {
                 .addHeader("Accept", "application/json")
                 .addHeader("Content-Type", "application/json")
                 .build();
-        ObjectMapper ow = new ObjectMapper();
 
         try (Response response = client.newCall(request).execute()) {
 
@@ -63,21 +62,22 @@ public class MochiService {
         SessionCookie sessionCookie = login();
         String deckId = UserInfo.askForDeckID();
         ArrayList<String> cardsContent = new ArrayList<>();
-        ObjectMapper ow = new ObjectMapper();
-        System.out.println(ow.writeValueAsString(dictionary.entrySet()));
 
         for (Map.Entry<String, String> entry :
                 dictionary.entrySet()) {
             String front = entry.getKey();
             String back = entry.getValue();
-            cardsContent.add(front + " --- " + back);
+            cardsContent.add(front + "---" + back);
         }
 
             for (String content : cardsContent) {
                 System.out.println(content);
                 try {
-                    sendACard(content, deckId, sessionCookie.getId(), sessionCookie.getRemember_token());
-                    //Thread.sleep(3000);
+                    Response response = sendACard(content, deckId, sessionCookie.getId(), sessionCookie.getRemember_token());
+                    response.close();
+                    System.out.println(response.headers());
+                    System.out.println(response.body());
+                    System.out.println(response);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -87,7 +87,7 @@ public class MochiService {
 
 
 
-    public static void sendACard(String content, String deckId, String userID, String rememberToken) throws IOException {
+    public static Response sendACard(String content, String deckId, String userID, String rememberToken) throws IOException {
         RequestBody body = RequestBody.create("{ \"card\": { \"content\": \"" + content + "\", \"deck-id\": \"" + deckId + "\" } }", null);
         Request request = new Request.Builder()
                 .url("https://api.mochi.cards/v1/cards")
@@ -97,10 +97,13 @@ public class MochiService {
                 .post(body)
                 .build();
         try {
-            client.newCall(request).execute();
+           Response response = client.newCall(request).execute();
+           response.body().close();
+           return response;
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return  null;
     }
 }
 
