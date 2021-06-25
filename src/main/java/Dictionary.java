@@ -17,11 +17,16 @@ import java.util.Objects;
 public class Dictionary {
 
     public static String getText(String columnName, Map<String, PageProperty> propertyMap) {
+        try{
         return switch (Objects.requireNonNull(propertyMap.get(columnName).getType())) {
             case RichText -> propertyMap.get(columnName).getRichText().get(0).getPlainText();
             case Title -> propertyMap.get(columnName).getTitle().get(0).getPlainText();
             default -> null;
         };
+        } catch (Exception e) {
+
+            return " ";
+        }
     }
 
     public static HashMap<String, String> createDictionary(NotionClient notionClient) throws IOException {

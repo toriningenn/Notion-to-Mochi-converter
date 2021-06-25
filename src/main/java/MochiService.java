@@ -1,26 +1,23 @@
-import com.fasterxml.jackson.databind.ObjectMapper;
 import notion.api.v1.NotionClient;
 import okhttp3.*;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
+
+import static org.fusesource.jansi.Ansi.ansi;
 
 public class MochiService {
     private final static OkHttpClient defaultClient = new OkHttpClient.Builder().build();
     private final static OkHttpClient client = defaultClient.newBuilder()
-            .readTimeout(30, TimeUnit.SECONDS)
-            .connectTimeout(30, TimeUnit.SECONDS)
-            .readTimeout(30,TimeUnit.SECONDS)
+            .readTimeout(3, TimeUnit.DAYS)
+            .connectTimeout(3, TimeUnit.DAYS)
+            .readTimeout(3,TimeUnit.DAYS)
             .connectionPool(new ConnectionPool(0, 1, TimeUnit.SECONDS))
             .build();
-//.protocols(List.of(Protocol.HTTP_1_1))
-    public static SessionCookie login() throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
+
+    public static SessionInfo login() throws IOException {
         String email = UserInfo.askForMochiEmail();
         String password = UserInfo.askForMochiPassword();
         RequestBody body = RequestBody.create(
@@ -47,10 +44,10 @@ public class MochiService {
                     .split("=")[1]
                     .split(";")[0];
 
-            SessionCookie sessionCookie = mapper.readValue(response.body().string(), SessionCookie.class);
-            sessionCookie.setRemember_token(rememberToken);
-            sessionCookie.setId(encryptedUserId);
-            return sessionCookie;
+            SessionInfo sessionInfo = new SessionInfo();
+            sessionInfo.setRemember_token(rememberToken);
+            sessionInfo.setId(encryptedUserId);
+            return sessionInfo;
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -59,7 +56,7 @@ public class MochiService {
 
     public static void createCards(NotionClient notionClient) throws IOException {
         HashMap<String, String> dictionary = Dictionary.createDictionary(notionClient);
-        SessionCookie sessionCookie = login();
+        SessionInfo sessionInfo = login();
         String deckId = UserInfo.askForDeckID();
         ArrayList<String> cardsContent = new ArrayList<>();
 
@@ -67,22 +64,20 @@ public class MochiService {
                 dictionary.entrySet()) {
             String front = entry.getKey();
             String back = entry.getValue();
-            cardsContent.add(front + "---" + back);
+            cardsContent.add(front + "\\n" + "---\\n" + back);
         }
 
             for (String content : cardsContent) {
-                System.out.println(content);
+                System.out.println(ansi().render("Creating card..:"));
+                System.out.println(ansi().render(content));
                 try {
-                    Response response = sendACard(content, deckId, sessionCookie.getId(), sessionCookie.getRemember_token());
+                    Response response = sendACard(content, deckId, sessionInfo.getId(), sessionInfo.getRemember_token());
                     response.close();
-                    System.out.println(response.headers());
-                    System.out.println(response.body());
-                    System.out.println(response);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
-        System.out.println("Ready!!!");
+        System.out.println(ansi().render("Ready!!!"));
         }
 
 
@@ -103,7 +98,7 @@ public class MochiService {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return  null;
+        return null;
     }
 }
 

@@ -1,19 +1,35 @@
-plugins {
-    id 'java'
+apply plugin: "application"
+mainClassName = "Main"
+run {
+    standardInput = System.in
+}
+
+jar {
+    manifest {
+        attributes(
+                'Main-Class': 'Main'
+        )
+    }
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
 }
 
 group 'org.example'
 version '1.0-SNAPSHOT'
+
+
 
 repositories {
     mavenCentral()
 }
 ext.notionSdkVersion = "0.1.9"
 dependencies {
-    testCompile group: 'junit', name: 'junit', version: '4.12'
+    implementation group: 'junit', name: 'junit', version: '4.12'
+    implementation 'de.codeshelf.consoleui:consoleui:0.0.13'
     implementation("com.github.seratch:notion-sdk-jvm-okhttp4:${notionSdkVersion}")
     implementation("com.github.seratch:notion-sdk-jvm-okhttp3:${notionSdkVersion}")
-    compile "com.squareup.okhttp3:okhttp-urlconnection:3.14.9"
+    implementation "com.squareup.okhttp3:okhttp-urlconnection:3.14.9"
     implementation("com.github.seratch:notion-sdk-jvm-core:${notionSdkVersion}")
     implementation("com.github.seratch:notion-sdk-jvm-slf4j:${notionSdkVersion}") // slf4j-api 1.7
     implementation("org.slf4j:slf4j-simple:1.7.30")
