@@ -9,7 +9,7 @@ https://www.oracle.com/java/technologies/javase-downloads.html
 
 ---------------
 
-           Can be used for any database, which has at least two properties (columns) of the Title or Text type.
+   Can be used for any database, which has at least two properties (columns) of the `Title` or `Text` type.
 
 <p align="center">
 <img height="160" src="https://tva1.sinaimg.cn/large/008i3skNgy1grupwbrbs7j30t408yab5.jpg">
