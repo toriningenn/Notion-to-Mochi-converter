@@ -1,40 +1,40 @@
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
 import notion.api.v1.NotionClient;
-import notion.api.v1.endpoint.DatabasesSupport;
 import notion.api.v1.model.databases.Database;
 import notion.api.v1.model.databases.QueryResults;
 import notion.api.v1.model.pages.Page;
 import notion.api.v1.model.pages.PageProperty;
 import org.apache.commons.lang3.ArrayUtils;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import static org.fusesource.jansi.Ansi.ansi;
+
+
 public class Dictionary {
 
-    public static String getText(String columnName, Map<String, PageProperty> propertyMap) {
-        try{
-        return switch (Objects.requireNonNull(propertyMap.get(columnName).getType())) {
-            case RichText -> propertyMap.get(columnName).getRichText().get(0).getPlainText();
-            case Title -> propertyMap.get(columnName).getTitle().get(0).getPlainText();
-            default -> null;
-        };
-        } catch (Exception e) {
-
+    public static String getText(String columnName, Map<String, PageProperty> propertyMap) throws Exception {
+        try {
+            if (propertyMap.containsKey(columnName)) {
+                return switch (Objects.requireNonNull(propertyMap.get(columnName).getType())) {
+                    case RichText -> propertyMap.get(columnName).getRichText().get(0).getPlainText();
+                    case Title -> propertyMap.get(columnName).getTitle().get(0).getPlainText();
+                    default -> null;
+                };
+            } else {
+                throw new Exception("Property not found!");
+            }
+        } catch (IndexOutOfBoundsException e) {
             return " ";
         }
     }
 
-    public static HashMap<String, String> createDictionary(NotionClient notionClient) throws IOException {
+    public static HashMap<String, String> createDictionary(NotionClient notionClient)  {
         HashMap<String, String> dictionary = new HashMap<String, String>();
-
-        ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
         List<Database> databasesList = notionClient.listDatabases().getResults();
-        Database database = UserInfo.askDatabaseIDIfNeededReturnDB(databasesList);
+        Database database = UserInfo.askDatabaseIDReturnDB(databasesList);
 
         assert database != null;
         String frontColumn = UserInfo.askFirstColumnName();
@@ -49,14 +49,16 @@ public class Dictionary {
             results = resultQuery.getResults().toArray(Page[]::new);
             pages = ArrayUtils.addAll(pages, results);
         }
+        try{
         for (Page page : pages) {
             Map<String, PageProperty> propertyMap = page.getProperties();
             String frontText = getText(frontColumn, propertyMap);
             String backText = getText(backColumn, propertyMap);
-            //вынести в отдельный метод!
-            dictionary.put(frontText,backText);
+            dictionary.put(frontText, backText);
+        } } catch (Exception e) {
+            System.out.println(ansi().render(AnsiColors.ANSI_RED + e.getMessage() + AnsiColors.ANSI_RESET));
+            createDictionary(notionClient);
         }
         return dictionary;
     }
-
 }

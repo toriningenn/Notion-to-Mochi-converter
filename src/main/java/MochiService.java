@@ -1,6 +1,6 @@
 import notion.api.v1.NotionClient;
 import okhttp3.*;
-import java.io.IOException;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -13,17 +13,19 @@ public class MochiService {
     private final static OkHttpClient client = defaultClient.newBuilder()
             .readTimeout(3, TimeUnit.DAYS)
             .connectTimeout(3, TimeUnit.DAYS)
-            .readTimeout(3,TimeUnit.DAYS)
+            .readTimeout(3, TimeUnit.DAYS)
+            .retryOnConnectionFailure(true)
             .connectionPool(new ConnectionPool(0, 1, TimeUnit.SECONDS))
             .build();
 
-    public static SessionInfo login() throws IOException {
+    public static SessionInfo login() {
         String email = UserInfo.askForMochiEmail();
         String password = UserInfo.askForMochiPassword();
         RequestBody body = RequestBody.create(
                 "{ \"session\": { \"email\": \"" + email + "\", \"password\": \"" + password + "\" } }",
                 null
         );
+
         Request request = new Request.Builder()
                 .url("https://api.mochi.cards/login")
                 .post(body)
@@ -48,13 +50,14 @@ public class MochiService {
             sessionInfo.setRemember_token(rememberToken);
             sessionInfo.setId(encryptedUserId);
             return sessionInfo;
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            System.out.println(ansi().render(AnsiColors.ANSI_RED + "Incorrect email or password." + AnsiColors.ANSI_RESET));
+            login();
         }
         return null;
     }
 
-    public static void createCards(NotionClient notionClient) throws IOException {
+    public static void createCards(NotionClient notionClient) {
         HashMap<String, String> dictionary = Dictionary.createDictionary(notionClient);
         SessionInfo sessionInfo = login();
         String deckId = UserInfo.askForDeckID();
@@ -67,22 +70,17 @@ public class MochiService {
             cardsContent.add(front + "\\n" + "---\\n" + back);
         }
 
-            for (String content : cardsContent) {
-                System.out.println(ansi().render("Creating card..:"));
-                System.out.println(ansi().render(content));
-                try {
-                    Response response = sendACard(content, deckId, sessionInfo.getId(), sessionInfo.getRemember_token());
-                    response.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        System.out.println(ansi().render("Ready!!!"));
+        for (String content : cardsContent) {
+            System.out.println(ansi().render(AnsiColors.ANSI_GREEN + "Creating card..:" + AnsiColors.ANSI_RESET));
+            System.out.println(ansi().render(content));
+            Response response = sendACard(content, deckId, sessionInfo.getId(), sessionInfo.getRemember_token());
+            response.close();
         }
+        System.out.println(ansi().render(AnsiColors.ANSI_GREEN + "Ready!!!" + AnsiColors.ANSI_RESET));
+    }
 
 
-
-    public static Response sendACard(String content, String deckId, String userID, String rememberToken) throws IOException {
+    public static Response sendACard(String content, String deckId, String userID, String rememberToken) {
         RequestBody body = RequestBody.create("{ \"card\": { \"content\": \"" + content + "\", \"deck-id\": \"" + deckId + "\" } }", null);
         Request request = new Request.Builder()
                 .url("https://api.mochi.cards/v1/cards")
@@ -92,11 +90,15 @@ public class MochiService {
                 .post(body)
                 .build();
         try {
-           Response response = client.newCall(request).execute();
-           response.body().close();
-           return response;
+            Response response = client.newCall(request).execute();
+            response.body().close();
+            if (response.code() == 400) {
+                System.out.println(ansi().render(AnsiColors.ANSI_RED + "Incorrect deck ID!" + AnsiColors.ANSI_RESET));
+                return null;
+            }
+            return response;
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(ansi().render(AnsiColors.ANSI_RED + "Mochi does not response." + AnsiColors.ANSI_RESET));
         }
         return null;
     }
