@@ -28,7 +28,7 @@ public class UserInfo {
             HashMap<String, InputResult> result = (HashMap<String, InputResult>) prompt.prompt(promptBuilder.build());
             return result.get("token").getInput();
         } catch (IOException e) {
-            System.out.println(ansi().render(AnsiColors.ANSI_RED + "Error" + AnsiColors.ANSI_RESET));
+            AnsiColors.ansiRedError("Error");
             return askToken();
         }
     }
@@ -39,7 +39,7 @@ public class UserInfo {
             if (databasesList.size() == 1) {
                 database = databasesList.get(0);
             } else {
-                System.out.println(ansi().render("You have multiply databases with this interaction!" +
+                System.out.println(ansi().render("You have multiple databases sharing this interaction!" +
                         "\nOpen the database as a full page in Notion. Use the Share menu to Copy link. " +
                         "\nNow paste the link in your text editor so you can take a closer look. The URL uses the following format:" +
                         "\nhttps://www.notion.so/{workspace_name}/{database_id}?v={view_id}"));
@@ -53,7 +53,7 @@ public class UserInfo {
                 database = databasesList.stream().filter(x -> x.getId().replaceAll("-", "").equals(id)).findFirst().orElseThrow();
             }
         } catch (Exception e) {
-            System.out.println(ansi().render(AnsiColors.ANSI_RED + "Database not found" + AnsiColors.ANSI_RESET));
+            AnsiColors.ansiRedError("Database not found");
             askDatabaseIDReturnDB(databasesList);
         }
         return database;
@@ -70,7 +70,7 @@ public class UserInfo {
 
             return result.get("first_column").getInput();
         } catch (IOException e) {
-            System.out.println(ansi().render(AnsiColors.ANSI_RED + "Error" + AnsiColors.ANSI_RESET));
+            AnsiColors.ansiRedError("Error");
             return askFirstColumnName();
         }
     }
@@ -86,7 +86,7 @@ public class UserInfo {
 
             return result.get("second_column").getInput();
         } catch (IOException e) {
-            System.out.println(ansi().render(AnsiColors.ANSI_RED + "Error" + AnsiColors.ANSI_RESET));
+            AnsiColors.ansiRedError("Error");
             return askSecondColumnName();
         }
     }
@@ -106,7 +106,7 @@ public class UserInfo {
 
             return result.get("deck_id").getInput();
         } catch (Exception e) {
-            System.out.println(ansi().render(AnsiColors.ANSI_RED + "Error" + AnsiColors.ANSI_RESET));
+            AnsiColors.ansiRedError("Error");
             return askForDeckID();
         }
     }
@@ -121,7 +121,7 @@ public class UserInfo {
             HashMap<String, InputResult> result = (HashMap<String, InputResult>) prompt.prompt(promptBuilder.build());
             return result.get("email").getInput();
         } catch (IOException e) {
-            System.out.println(ansi().render(AnsiColors.ANSI_RED + "Error" + AnsiColors.ANSI_RESET));
+            AnsiColors.ansiRedError("Error");
             return askForMochiEmail();
         }
     }
@@ -138,7 +138,7 @@ public class UserInfo {
 
             return result.get("password").getInput();
         } catch (IOException e) {
-            System.out.println(ansi().render(AnsiColors.ANSI_RED + "Error" + AnsiColors.ANSI_RESET));
+            AnsiColors.ansiRedError("Error");
             return askForMochiPassword();
         }
     }

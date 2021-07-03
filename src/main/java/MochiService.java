@@ -51,7 +51,7 @@ public class MochiService {
             sessionInfo.setId(encryptedUserId);
             return sessionInfo;
         } catch (Exception e) {
-            System.out.println(ansi().render(AnsiColors.ANSI_RED + "Incorrect email or password." + AnsiColors.ANSI_RESET));
+            AnsiColors.ansiRedError("Incorrect email or password.");
             login();
         }
         return null;
@@ -71,12 +71,11 @@ public class MochiService {
         }
 
         for (String content : cardsContent) {
-            System.out.println(ansi().render(AnsiColors.ANSI_GREEN + "Creating card..:" + AnsiColors.ANSI_RESET));
+            AnsiColors.ansiGreenMessage("Creating card..:");
             System.out.println(ansi().render(content));
-            Response response = sendACard(content, deckId, sessionInfo.getId(), sessionInfo.getRemember_token());
-            response.close();
+            sendACard(content, deckId, sessionInfo.getId(), sessionInfo.getRemember_token());
         }
-        System.out.println(ansi().render(AnsiColors.ANSI_GREEN + "Ready!!!" + AnsiColors.ANSI_RESET));
+        AnsiColors.ansiGreenMessage("Ready!!!");
     }
 
 
@@ -92,13 +91,9 @@ public class MochiService {
         try {
             Response response = client.newCall(request).execute();
             response.body().close();
-            if (response.code() == 400) {
-                System.out.println(ansi().render(AnsiColors.ANSI_RED + "Incorrect deck ID!" + AnsiColors.ANSI_RESET));
-                return null;
-            }
             return response;
         } catch (Exception e) {
-            System.out.println(ansi().render(AnsiColors.ANSI_RED + "Mochi does not response." + AnsiColors.ANSI_RESET));
+            AnsiColors.ansiRedError("Mochi does not response.");
         }
         return null;
     }

@@ -10,9 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import static org.fusesource.jansi.Ansi.ansi;
-
-
 public class Dictionary {
 
     public static String getText(String columnName, Map<String, PageProperty> propertyMap) throws Exception {
@@ -31,7 +28,7 @@ public class Dictionary {
         }
     }
 
-    public static HashMap<String, String> createDictionary(NotionClient notionClient)  {
+    public static HashMap<String, String> createDictionary(NotionClient notionClient) {
         HashMap<String, String> dictionary = new HashMap<String, String>();
         List<Database> databasesList = notionClient.listDatabases().getResults();
         Database database = UserInfo.askDatabaseIDReturnDB(databasesList);
@@ -49,14 +46,15 @@ public class Dictionary {
             results = resultQuery.getResults().toArray(Page[]::new);
             pages = ArrayUtils.addAll(pages, results);
         }
-        try{
-        for (Page page : pages) {
-            Map<String, PageProperty> propertyMap = page.getProperties();
-            String frontText = getText(frontColumn, propertyMap);
-            String backText = getText(backColumn, propertyMap);
-            dictionary.put(frontText, backText);
-        } } catch (Exception e) {
-            System.out.println(ansi().render(AnsiColors.ANSI_RED + e.getMessage() + AnsiColors.ANSI_RESET));
+        try {
+            for (Page page : pages) {
+                Map<String, PageProperty> propertyMap = page.getProperties();
+                String frontText = getText(frontColumn, propertyMap);
+                String backText = getText(backColumn, propertyMap);
+                dictionary.put(frontText, backText);
+            }
+        } catch (Exception e) {
+            AnsiColors.ansiRedError(e.getMessage());
             createDictionary(notionClient);
         }
         return dictionary;
